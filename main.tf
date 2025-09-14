@@ -1,44 +1,22 @@
 #############################
-# Backend Setup (S3 Bucket)
+# Provider
 #############################
 
 provider "aws" {
   region = "us-east-1"
 }
 
-# S3 bucket for storing remote Terraform state
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "my-prod-terraform-state-bucket"
-
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
-
-  tags = {
-    Name        = "Terraform State Bucket"
-    Environment = "prod"
-  }
-}
-
 #############################
-# Terraform Backend
+# Terraform Backend Setup
 #############################
 
 terraform {
   backend "s3" {
-    bucket         = "my-prod-terraform-state-bucket"
-    key            = "ecs/prod/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    use_lockfile   = true
+    bucket       = "my-rehydration-demo"
+    key          = "ecs/prod/terraform.tfstate"
+    region       = "us-east-1"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 
