@@ -2,6 +2,12 @@ provider "aws" {
   region = "us-east-1"  # your region
 }
 
+# Create CloudWatch Log Group for ECS logs
+resource "aws_cloudwatch_log_group" "ecs_log_group" {
+  name              = "/ecs/my-fargate-service"
+  retention_in_days = 7
+}
+
 # Get the default VPC
 data "aws_vpc" "default" {
   default = true
@@ -77,6 +83,14 @@ resource "aws_ecs_task_definition" "fargate_task" {
         containerPort = 3000
         protocol      = "tcp"
       }]
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = aws_cloudwatch_log_group.ecs_log_group.name
+          "awslogs-region"        = "us-east-1"
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
     }
   ])
 }
@@ -89,9 +103,8 @@ resource "aws_ecs_service" "fargate_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = data.aws_subnets.default_public.ids
-    security_groups = [aws_security_group.ecs_sg.id]
+    subnets          = data.aws_subnets.default_public.ids
+    security_groups  = [aws_security_group.ecs_sg.id]
     assign_public_ip = true
   }
 }
-
