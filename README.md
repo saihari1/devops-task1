@@ -8,6 +8,7 @@ This project demonstrates a CI/CD pipeline using **Jenkins**, **DockerHub**, and
 
 ## 📊 Architecture Diagram
 
+![Demo Image](images/new.png)
 
 
 
