@@ -11,6 +11,11 @@ This project demonstrates a CI/CD pipeline using **Jenkins**, **DockerHub**, and
 ![Diagram](new.png)
 
 
+## Application Access
+
+✅ Once deployed, access the running Node.js app at:
+
+http://54.234.64.42:3000
 
 
 ---
