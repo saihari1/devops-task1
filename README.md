@@ -1,64 +1,111 @@
-# Logo Server
+# 📘 README.md for ECS Fargate Deployment with Jenkins + Terraform
 
-A simple Express.js web server that serves the Swayatt logo image.
+##  Project Overview
 
-## What is this app?
+This project sets up a **CI/CD pipeline** using **Jenkins**, **DockerHub**, and **Terraform** to deploy a containerized application to **AWS ECS Fargate**.
+
+The main flow is:
+
+1. Developer pushes code to **GitHub**.
+2. A **Jenkins pipeline (running on EC2)** is triggered via **webhook**.
+3. Jenkins builds a **Docker image** and pushes it to **DockerHub**.
+4. Jenkins executes **Terraform** scripts that:
+
+   * Create an **ECS Fargate Cluster** and Service.
+   * Use **IAM roles** for ECS execution.
+   * Store Terraform **state in an S3 backend**.
+   * Deploy the Docker image to ECS tasks.
+5. Logs are sent to **CloudWatch Logs** for monitoring.
+
+---
+
+## 🏗 Infrastructure Components
+
+### AWS Resources Created via Terraform
+
+* **S3 Bucket** → Remote Terraform backend (`my-rehydration-demo`)
+* **VPC & Subnets** → Default AWS VPC and subnets
+* **Security Group** → Allow inbound traffic on port `3000`
+* **CloudWatch Log Group** → `/ecs/devopstask` for ECS logs
+* **IAM Role & Policy** → `ecsTaskExecutionRole-prod` with `AmazonECSTaskExecutionRolePolicy`
+* **ECS Cluster** → `prod-fargate-cluster`
+* **ECS Task Definition** → Runs container `saihari1/devopstask:latest`
+* **ECS Service (Fargate)** → `devopstask-prod-service` with public IP
+
+### CI/CD Workflow
+
+* **Jenkins EC2 Server**
+
+  * GitHub Webhook triggers pipeline
+  * Pipeline stages:
+
+    * Checkout Code
+    * Install Dependencies
+    * Build Docker Image
+    * Push Docker Image → DockerHub
+    * Run Terraform → Deploy on ECS
+
+---
+
+##  Deployment Flow
+
+1. **Developer Pushes Code → GitHub**
+2. **Webhook triggers Jenkins pipeline on EC2**
+3. **Jenkins builds & pushes Docker image → DockerHub**
+4. **Terraform runs → Deploy ECS Fargate Service**
+5. **App running on ECS → Accessible on port 3000**
+6. **Logs collected in CloudWatch**
+
+---
+
+##  Architectural Diagram
+
+Here’s a diagram representing the flow:
+
+```mermaid
+flowchart TD
+    A[Developer] -->|Push Code| B[GitHub Repo]
+    B -->|Webhook Trigger| C[Jenkins on EC2]
+    C -->|Checkout + Build| D[Docker Image]
+    D -->|Push| E[DockerHub]
+    C -->|Run Terraform| F[S3 Backend for State]
+    C -->|Provision Infra| G[ECS Cluster - Fargate]
+    G --> H[ECS Task: saihaari1/devopstask:latest]
+    H -->|Logs| I[CloudWatch Logs]
+    H -->|Serve App| J[Public Internet via Port 3000]
+```
+
+---
+
+## ⚙ Technologies Used
+
+* **AWS ECS Fargate**
+* **AWS IAM, VPC, Subnets, CloudWatch**
+* **Terraform (with S3 backend)**
+* **Jenkins (EC2-based)**
+* **Docker & DockerHub**
+* **GitHub SCM with Webhooks**
 
 
 
+##  How to Run
 
-This is a lightweight Node.js application built with Express.js that serves a single logo image (`logoswayatt.png`) when accessed through a web browser. When you visit the root URL, the server responds by displaying the Swayatt logo.
+1. Clone the repository
 
-## Prerequisites
-
-- Node.js (version 12 or higher)
-- npm (Node Package Manager)
-
-## Installation
-
-1. Clone or download this repository
-2. Navigate to the project directory:
    ```bash
-   cd "devops task"
+   git clone <your-repo-url>
+   cd repo
    ```
-3. Install dependencies:
+2. Build & push Docker image (via Jenkins)
+3. Run Terraform
+
    ```bash
-   npm install
+   terraform init
+   terraform plan
+   terraform apply
    ```
+4. Access app at:
 
-## How to Start the App
-
-Run the following command:
-```bash
-npm start
-```
-
-The server will start and display:
-```
-Server running on http://localhost:3000
-```
-
-## Usage
-
-Once the server is running, open your web browser and navigate to:
-```
-http://localhost:3000
-```
-
-You will see the Swayatt logo displayed in your browser.
-
-## Project Structure
-
-```
-├── app.js              # Main server file
-├── package.json        # Project dependencies and scripts
-├── logoswayatt.png     # Logo image file
-└── README.md          # This file
-```
-
-## Technical Details
-
-- **Framework**: Express.js
-- **Port**: 3000
-- **Endpoint**: GET `/` - serves the logo image
-- **File served**: `logoswayatt.png`
+   ```
+   http://<ecs-public-ip>:3000
+   ```
