@@ -21,8 +21,8 @@ resource "aws_security_group" "ecs_sg" {
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 3000
+    to_port     = 3000
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -71,10 +71,10 @@ resource "aws_ecs_task_definition" "fargate_task" {
   container_definitions = jsonencode([
     {
       name      = "app"
-      image     = "vinaikolluri/recepiefinder:latest"
+      image     = "saihari1/devopstask:latest"
       essential = true
       portMappings = [{
-        containerPort = 80
+        containerPort = 3000
         protocol      = "tcp"
       }]
     }
