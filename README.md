@@ -4,6 +4,9 @@ A simple Express.js web server that serves the Swayatt logo image.
 
 ## What is this app?
 
+
+
+
 This is a lightweight Node.js application built with Express.js that serves a single logo image (`logoswayatt.png`) when accessed through a web browser. When you visit the root URL, the server responds by displaying the Swayatt logo.
 
 ## Prerequisites
